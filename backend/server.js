@@ -1,6 +1,5 @@
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
@@ -27,7 +26,7 @@ const corsOptions = {
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'Cookie']
 };
-
+app.set('trust proxy', 1);
 app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 
