@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SecureAuth | Login</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="glass-card login-card">
+            <div class="logo-section">
+                <i class="fas fa-shield-haltered"></i>
+                <h1>SecureAuth</h1>
+                <p>Secure Login System</p>
+            </div>
+            
+            <div id="errorMessage" class="error-message hidden"></div>
+            <div id="successMessage" class="success-message hidden"></div>
+            
+            <form id="loginForm">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <i class="fas fa-eye-slash toggle-password" style="right: 15px; left: auto; cursor: pointer;"></i>
+                </div>
+                
+                <button type="submit" class="btn-primary">Login</button>
+            </form>
+            
+            <div id="twofaSection" class="twofa-section hidden">
+                <h3>Two-Factor Authentication</h3>
+                <input type="text" id="twofaCode" placeholder="000000" maxlength="6">
+                <button id="verify2faBtn" class="btn-primary">Verify</button>
+                <button id="cancel2faBtn" class="btn-secondary">Cancel</button>
+            </div>
+            
+            <div class="links">
+                <a href="#" id="createAccountBtn">Create Account</a>
+                <a href="#" id="forgotPasswordBtn">Forgot Password?</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="registerModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close close-register">&times;</span>
+            <h2>Create Account</h2>
+            <form id="registerForm">
+                <input type="text" id="regUsername" placeholder="Username" required>
+                <input type="email" id="regEmail" placeholder="Email" required>
+                <input type="password" id="regPassword" placeholder="Password" required>
+                <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
+                <button type="submit" class="btn-primary">Register</button>
+            </form>
+        </div>
+    </div>
+    
+    <div id="forgotModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close close-forgot">&times;</span>
+            <h2>Reset Password</h2>
+            <form id="forgotForm">
+                <input type="email" id="forgotEmail" placeholder="Email" required>
+                <button type="submit" class="btn-primary">Send Reset Link</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="js/api.js"></script>
+    <script src="js/login.js"></script>
+</body>
+</html>
