@@ -1,4 +1,7 @@
-const API_BASE_URL = 'http://localhost:3000/api';
+// Auto-detect API URL
+const API_BASE_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:3000/api'
+  : 'https://secure-auth-system.vercel.app/api';
 
 class AuthAPI {
     static async request(endpoint, options = {}) {
@@ -14,11 +17,11 @@ class AuthAPI {
             
             const data = await response.json();
             
-            // Handle unauthorized - redirect to login
             if (response.status === 401) {
-                console.log('Unauthorized, redirecting to login');
                 localStorage.removeItem('user');
-                window.location.href = '/index.html';
+                if (!window.location.pathname.includes('index.html')) {
+                    window.location.href = '/index.html';
+                }
                 throw new Error('Session expired');
             }
             
