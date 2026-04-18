@@ -1,29 +1,16 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// Create transporter
-const transporter = nodemailer.createTransport({
-  service: process.env.EMAIL_SERVICE || 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
-
-// Verify email configuration
-transporter.verify((error, success) => {
-  if (error) {
-    console.log('❌ Email configuration error:', error);
-  } else {
-    console.log('✅ Email server ready to send messages');
-  }
-});
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Send verification email
 const sendVerificationEmail = async (email, verificationCode) => {
+  console.log('📧 Sending verification email to:', email);
+
   try {
-    const mailOptions = {
-      from: `"SecureAuth" <${process.env.EMAIL_USER}>`,
-      to: email,
+    const { data, error } = await resend.emails.send({
+      from: 'SecureAuth <onboarding@resend.dev>',  // Resend's free default sender
+      to: [email],
       subject: 'Verify Your Email - SecureAuth',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
@@ -39,23 +26,30 @@ const sendVerificationEmail = async (email, verificationCode) => {
           <p style="color: #666; font-size: 12px;">SecureAuth - Advanced Security Authentication</p>
         </div>
       `
-    };
-    
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Verification email sent to:', email);
+    });
+
+    if (error) {
+      console.error('❌ Resend error:', error);
+      return false;
+    }
+
+    console.log('✅ Verification email sent! ID:', data?.id);
     return true;
+
   } catch (error) {
-    console.error('❌ Email send error:', error);
+    console.error('❌ Email send error:', error.message);
     return false;
   }
 };
 
 // Send password reset email
 const sendResetPasswordEmail = async (email, resetCode) => {
+  console.log('📧 Sending reset email to:', email);
+
   try {
-    const mailOptions = {
-      from: `"SecureAuth" <${process.env.EMAIL_USER}>`,
-      to: email,
+    const { data, error } = await resend.emails.send({
+      from: 'SecureAuth <onboarding@resend.dev>',
+      to: [email],
       subject: 'Password Reset Request - SecureAuth',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
@@ -71,23 +65,30 @@ const sendResetPasswordEmail = async (email, resetCode) => {
           <p style="color: #666; font-size: 12px;">SecureAuth - Advanced Security Authentication</p>
         </div>
       `
-    };
-    
-    const info = await transporter.sendMail(mailOptions);
-    console.log('✅ Password reset email sent to:', email);
+    });
+
+    if (error) {
+      console.error('❌ Resend error:', error);
+      return false;
+    }
+
+    console.log('✅ Reset email sent! ID:', data?.id);
     return true;
+
   } catch (error) {
-    console.error('❌ Email send error:', error);
+    console.error('❌ Email send error:', error.message);
     return false;
   }
 };
 
 // Send new device login alert
 const sendNewDeviceAlert = async (email, deviceInfo, ipAddress) => {
+  console.log('📧 Sending device alert to:', email);
+
   try {
-    const mailOptions = {
-      from: `"SecureAuth" <${process.env.EMAIL_USER}>`,
-      to: email,
+    const { data, error } = await resend.emails.send({
+      from: 'SecureAuth <onboarding@resend.dev>',
+      to: [email],
       subject: '⚠️ New Device Login Alert - SecureAuth',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
@@ -103,19 +104,24 @@ const sendNewDeviceAlert = async (email, deviceInfo, ipAddress) => {
           <p style="color: #666; font-size: 12px;">SecureAuth - Advanced Security Authentication</p>
         </div>
       `
-    };
-    
-    await transporter.sendMail(mailOptions);
-    console.log('✅ New device alert sent to:', email);
+    });
+
+    if (error) {
+      console.error('❌ Resend error:', error);
+      return false;
+    }
+
+    console.log('✅ Alert email sent! ID:', data?.id);
     return true;
+
   } catch (error) {
-    console.error('❌ Alert email error:', error);
+    console.error('❌ Email send error:', error.message);
     return false;
   }
 };
 
-module.exports = { 
-  sendVerificationEmail, 
-  sendResetPasswordEmail, 
-  sendNewDeviceAlert 
+module.exports = {
+  sendVerificationEmail,
+  sendResetPasswordEmail,
+  sendNewDeviceAlert
 };
