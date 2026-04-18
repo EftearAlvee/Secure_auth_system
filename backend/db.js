@@ -39,10 +39,6 @@ class Database {
 
     } catch (error) {
       console.error('❌ MongoDB Connection Failed:', error.message);
-      console.error('\n🔧 Troubleshooting Tips:');
-      console.error('1. Check MONGODB_URI in .env file');
-      console.error('2. Verify IP is whitelisted in MongoDB Atlas');
-      console.error('3. Check username/password are correct');
       throw error;
     }
   }
@@ -61,15 +57,18 @@ class Database {
       this.isConnected = false;
     });
 
-    process.on('SIGINT', async () => {
-      await this.disconnect();
-      process.exit(0);
-    });
+    // Only add process listeners in non-serverless environment
+    if (process.env.NODE_ENV !== 'production') {
+      process.on('SIGINT', async () => {
+        await this.disconnect();
+        process.exit(0);
+      });
 
-    process.on('SIGTERM', async () => {
-      await this.disconnect();
-      process.exit(0);
-    });
+      process.on('SIGTERM', async () => {
+        await this.disconnect();
+        process.exit(0);
+      });
+    }
   }
 
   async disconnect() {
@@ -134,4 +133,29 @@ class Database {
   }
 }
 
+// For Vercel serverless, we need to cache the connection
+let cached = global.mongooseDb;
+
+if (!cached) {
+  cached = global.mongooseDb = { conn: null, promise: null };
+}
+
+async function getDbConnection() {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    const db = new Database();
+    cached.promise = db.connect().then((connection) => {
+      return connection;
+    });
+  }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
+
+// Export both the class and the cached connection function
 module.exports = new Database();
+module.exports.getDbConnection = getDbConnection;
