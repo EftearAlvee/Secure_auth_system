@@ -1,3 +1,6 @@
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
