@@ -16,39 +16,39 @@
                 <h1>SecureAuth</h1>
                 <p>Secure Login System</p>
             </div>
-            
+
             <div id="errorMessage" class="error-message hidden"></div>
             <div id="successMessage" class="success-message hidden"></div>
-            
+
             <form id="loginForm">
                 <div class="input-group">
                     <i class="fas fa-user"></i>
                     <input type="text" id="username" placeholder="Username" required>
                 </div>
-                
+
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
                     <input type="password" id="password" placeholder="Password" required>
                     <i class="fas fa-eye-slash toggle-password" style="right: 15px; left: auto; cursor: pointer;"></i>
                 </div>
-                
+
                 <button type="submit" class="btn-primary">Login</button>
             </form>
-            
+
             <div id="twofaSection" class="twofa-section hidden">
                 <h3>Two-Factor Authentication</h3>
                 <input type="text" id="twofaCode" placeholder="000000" maxlength="6">
                 <button id="verify2faBtn" class="btn-primary">Verify</button>
                 <button id="cancel2faBtn" class="btn-secondary">Cancel</button>
             </div>
-            
+
             <div class="links">
                 <a href="#" id="createAccountBtn">Create Account</a>
                 <a href="#" id="forgotPasswordBtn">Forgot Password?</a>
             </div>
         </div>
     </div>
-    
+
     <div id="registerModal" class="modal hidden">
         <div class="modal-content">
             <span class="close close-register">&times;</span>
@@ -62,7 +62,7 @@
             </form>
         </div>
     </div>
-    
+
     <div id="forgotModal" class="modal hidden">
         <div class="modal-content">
             <span class="close close-forgot">&times;</span>
@@ -73,8 +73,29 @@
             </form>
         </div>
     </div>
-    
+
     <script src="js/api.js"></script>
     <script src="js/login.js"></script>
+</body>
+</html>
+    <!-- 2FA Verification Modal -->
+    <div id="twoFAModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close close-2fa">&times;</span>
+            <h2><i class="fas fa-shield-alt"></i> Two-Factor Authentication</h2>
+            <p>Enter the 6-digit verification code sent to your email.</p>
+            <div class="input-group">
+                <i class="fas fa-code"></i>
+                <input type="text" id="twoFACode" placeholder="000000" maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 5px;">
+            </div>
+            <div class="input-group">
+                <label>
+                    <input type="checkbox" id="trustDevice"> Trust this device for 30 days
+                </label>
+            </div>
+            <button id="verify2FABtn" class="btn-primary">Verify & Login</button>
+            <button id="resend2FABtn" class="btn-secondary">Resend Code</button>
+        </div>
+    </div>
 </body>
 </html>

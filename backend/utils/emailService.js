@@ -1,16 +1,51 @@
-const { Resend } = require('resend');
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Force load environment variables
+dotenv.config({ path: '../.env' });
+
+let transporter = null;
+let isVerified = false;
+
+const getTransporter = () => {
+  if (transporter) return transporter;
+
+  const emailUser = process.env.EMAIL_USER;
+  const emailPass = process.env.EMAIL_PASS;
+
+  console.log('📧 Email Service Init - User:', emailUser);
+  console.log('📧 Email Service Init - Pass exists:', !!emailPass);
+
+  if (!emailUser || !emailPass) {
+    console.error('❌ EMAIL_USER or EMAIL_PASS not found in environment');
+    return null;
+  }
+
+  transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: emailUser,
+      pass: emailPass
+    }
+  });
+
+  return transporter;
+};
 
 // Send verification email
-const sendVerificationEmail = async (email, verificationCode) => {
+export const sendVerificationEmail = async (email, verificationCode) => {
   console.log('📧 Sending verification email to:', email);
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'SecureAuth <onboarding@resend.dev>',  // Resend's free default sender
-      to: [email],
+    const trans = getTransporter();
+    if (!trans) {
+      console.error('❌ Transporter not available - check EMAIL_USER and EMAIL_PASS');
+      return false;
+    }
+
+    const mailOptions = {
+      from: `"SecureAuth" <${process.env.EMAIL_USER}>`,
+      to: email,
       subject: 'Verify Your Email - SecureAuth',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
@@ -26,30 +61,34 @@ const sendVerificationEmail = async (email, verificationCode) => {
           <p style="color: #666; font-size: 12px;">SecureAuth - Advanced Security Authentication</p>
         </div>
       `
-    });
+    };
 
-    if (error) {
-      console.error('❌ Resend error:', error);
-      return false;
-    }
-
-    console.log('✅ Verification email sent! ID:', data?.id);
+    const info = await trans.sendMail(mailOptions);
+    console.log('✅ Verification email sent to:', email);
+    console.log('   Message ID:', info.messageId);
     return true;
 
   } catch (error) {
     console.error('❌ Email send error:', error.message);
+    if (error.message.includes('Invalid login')) {
+      console.error('   Your Gmail App Password may be incorrect. Generate a new one at:');
+      console.error('   https://myaccount.google.com/apppasswords');
+    }
     return false;
   }
 };
 
 // Send password reset email
-const sendResetPasswordEmail = async (email, resetCode) => {
+export const sendResetPasswordEmail = async (email, resetCode) => {
   console.log('📧 Sending reset email to:', email);
 
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'SecureAuth <onboarding@resend.dev>',
-      to: [email],
+    const trans = getTransporter();
+    if (!trans) return false;
+
+    const mailOptions = {
+      from: `"SecureAuth" <${process.env.EMAIL_USER}>`,
+      to: email,
       subject: 'Password Reset Request - SecureAuth',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
@@ -65,30 +104,27 @@ const sendResetPasswordEmail = async (email, resetCode) => {
           <p style="color: #666; font-size: 12px;">SecureAuth - Advanced Security Authentication</p>
         </div>
       `
-    });
+    };
 
-    if (error) {
-      console.error('❌ Resend error:', error);
-      return false;
-    }
-
-    console.log('✅ Reset email sent! ID:', data?.id);
+    const info = await trans.sendMail(mailOptions);
+    console.log('✅ Reset email sent to:', email);
     return true;
 
   } catch (error) {
-    console.error('❌ Email send error:', error.message);
+    console.error('❌ Reset email error:', error.message);
     return false;
   }
 };
 
 // Send new device login alert
-const sendNewDeviceAlert = async (email, deviceInfo, ipAddress) => {
-  console.log('📧 Sending device alert to:', email);
-
+export const sendNewDeviceAlert = async (email, deviceInfo, ipAddress) => {
   try {
-    const { data, error } = await resend.emails.send({
-      from: 'SecureAuth <onboarding@resend.dev>',
-      to: [email],
+    const trans = getTransporter();
+    if (!trans) return false;
+
+    const mailOptions = {
+      from: `"SecureAuth" <${process.env.EMAIL_USER}>`,
+      to: email,
       subject: '⚠️ New Device Login Alert - SecureAuth',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
@@ -104,24 +140,52 @@ const sendNewDeviceAlert = async (email, deviceInfo, ipAddress) => {
           <p style="color: #666; font-size: 12px;">SecureAuth - Advanced Security Authentication</p>
         </div>
       `
-    });
+    };
 
-    if (error) {
-      console.error('❌ Resend error:', error);
-      return false;
-    }
-
-    console.log('✅ Alert email sent! ID:', data?.id);
+    await trans.sendMail(mailOptions);
+    console.log('✅ New device alert sent to:', email);
     return true;
 
   } catch (error) {
-    console.error('❌ Email send error:', error.message);
+    console.error('❌ Alert email error:', error.message);
     return false;
   }
 };
 
-module.exports = {
-  sendVerificationEmail,
-  sendResetPasswordEmail,
-  sendNewDeviceAlert
+// Send 2FA code email
+export const sendTwoFACode = async (email, twoFACode) => {
+  console.log('📧 Sending 2FA code to:', email);
+
+  try {
+    const trans = getTransporter();
+    if (!trans) return false;
+
+    const mailOptions = {
+      from: `"SecureAuth" <${process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Your Login Verification Code - SecureAuth',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+          <h2 style="color: #4F46E5;">Login Verification Code</h2>
+          <p>You are trying to log in to your SecureAuth account.</p>
+          <p>Your verification code is:</p>
+          <div style="background: #f0f0f0; padding: 15px; font-size: 24px; font-weight: bold; text-align: center; letter-spacing: 5px; border-radius: 5px;">
+            ${twoFACode}
+          </div>
+          <p>This code will expire in 5 minutes.</p>
+          <p>If you didn't attempt to log in, please ignore this email and change your password immediately.</p>
+          <hr style="margin: 20px 0;">
+          <p style="color: #666; font-size: 12px;">SecureAuth - Advanced Security Authentication</p>
+        </div>
+      `
+    };
+
+    const info = await trans.sendMail(mailOptions);
+    console.log('✅ 2FA code sent to:', email);
+    return true;
+
+  } catch (error) {
+    console.error('❌ 2FA email error:', error.message);
+    return false;
+  }
 };

@@ -25,9 +25,14 @@
                         </div>
                     </div>
                 </div>
-                <button id="logoutBtn" class="logout-btn">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
+                <div style="display: flex; gap: 10px;">
+                    <button id="settingsBtn" class="btn-secondary" style="background: #6c757d;">
+                        <i class="fas fa-cog"></i> Settings
+                    </button>
+                    <button id="logoutBtn" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
             </div>
             
             <div class="stats-grid">
@@ -47,13 +52,13 @@
                     <p>Member Since</p>
                 </div>
             </div>
-            
+
             <div class="chart-container">
                 <canvas id="activityChart"></canvas>
             </div>
         </div>
     </div>
-    
+
     <!-- Logout Confirmation Modal -->
     <div id="logoutConfirmModal" class="modal hidden">
         <div class="modal-content" style="max-width: 350px; text-align: center;">
@@ -65,7 +70,7 @@
             </div>
         </div>
     </div>
-    
+
     <script src="js/api.js"></script>
     <script src="js/welcome.js"></script>
 </body>

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 class Database {
   constructor() {
@@ -56,19 +56,6 @@ class Database {
       console.log('🟡 Mongoose disconnected from MongoDB');
       this.isConnected = false;
     });
-
-    // Only add process listeners in non-serverless environment
-    if (process.env.NODE_ENV !== 'production') {
-      process.on('SIGINT', async () => {
-        await this.disconnect();
-        process.exit(0);
-      });
-
-      process.on('SIGTERM', async () => {
-        await this.disconnect();
-        process.exit(0);
-      });
-    }
   }
 
   async disconnect() {
@@ -117,7 +104,7 @@ class Database {
     try {
       if (!this.isConnected) return false;
 
-      const User = require('./models/user');
+      const User = (await import('./models/user.js')).default;
 
       await User.collection.createIndex({ username: 1 }, { unique: true });
       await User.collection.createIndex({ email: 1 }, { unique: true });
@@ -133,29 +120,4 @@ class Database {
   }
 }
 
-// For Vercel serverless, we need to cache the connection
-let cached = global.mongooseDb;
-
-if (!cached) {
-  cached = global.mongooseDb = { conn: null, promise: null };
-}
-
-async function getDbConnection() {
-  if (cached.conn) {
-    return cached.conn;
-  }
-
-  if (!cached.promise) {
-    const db = new Database();
-    cached.promise = db.connect().then((connection) => {
-      return connection;
-    });
-  }
-
-  cached.conn = await cached.promise;
-  return cached.conn;
-}
-
-// Export both the class and the cached connection function
-module.exports = new Database();
-module.exports.getDbConnection = getDbConnection;
+export default new Database();

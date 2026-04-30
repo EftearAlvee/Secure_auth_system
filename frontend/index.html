@@ -16,35 +16,55 @@
                 <h1>SecureAuth</h1>
                 <p>Secure Login System</p>
             </div>
-            
+
             <div id="errorMessage" class="error-message hidden"></div>
             <div id="successMessage" class="success-message hidden"></div>
-            
+
             <!-- Login Form -->
             <form id="loginForm">
                 <div class="input-group">
                     <i class="fas fa-user"></i>
                     <input type="text" id="username" placeholder="Username" required>
                 </div>
-                
+
                 <div class="input-group">
                     <i class="fas fa-lock"></i>
                     <input type="password" id="password" placeholder="Password" required>
                     <i class="fas fa-eye-slash toggle-password" style="right: 15px; left: auto; cursor: pointer;"></i>
                 </div>
-                
+
                 <button type="submit" class="btn-primary">
                     <i class="fas fa-sign-in-alt"></i> Login
                 </button>
             </form>
-            
+
             <div class="links">
                 <a href="#" id="createAccountBtn"><i class="fas fa-user-plus"></i> Create Account</a>
                 <a href="#" id="forgotPasswordBtn"><i class="fas fa-key"></i> Forgot Password?</a>
             </div>
         </div>
     </div>
-    
+
+    <!-- 2FA Verification Modal -->
+<div id="twoFAModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close close-2fa">&times;</span>
+        <h2><i class="fas fa-shield-alt"></i> Two-Factor Authentication</h2>
+        <p>Enter the 6-digit verification code sent to your email.</p>
+        <div class="input-group">
+            <i class="fas fa-code"></i>
+            <input type="text" id="twoFACode" placeholder="000000" maxlength="6" style="text-align: center; font-size: 20px; letter-spacing: 5px;">
+        </div>
+        <div class="input-group">
+            <label>
+                <input type="checkbox" id="trustDevice"> Trust this device for 30 days
+            </label>
+        </div>
+        <button id="verify2FABtn" class="btn-primary">Verify & Login</button>
+        <button id="resend2FABtn" class="btn-secondary">Resend Code</button>
+    </div>
+</div>
+
     <!-- Register Modal with Password Validation -->
     <div id="registerModal" class="modal hidden">
         <div class="modal-content">
@@ -64,46 +84,46 @@
                     <input type="password" id="regPassword" placeholder="Password" required>
                     <i class="fas fa-eye-slash toggle-reg-password" style="right: 15px; left: auto; cursor: pointer;"></i>
                 </div>
-                
+
                 <!-- Password Requirements List -->
                 <div class="password-requirements" id="passwordRequirements">
                     <p style="font-size: 12px; margin-bottom: 8px; color: #666;">Password must contain:</p>
                     <ul style="list-style: none; padding-left: 0;">
                         <li id="req-length" style="font-size: 11px; margin: 4px 0; color: #999;">
-                            <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i> 
+                            <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i>
                             At least 8 characters
                         </li>
                         <li id="req-upper" style="font-size: 11px; margin: 4px 0; color: #999;">
-                            <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i> 
+                            <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i>
                             At least 1 uppercase letter (A-Z)
                         </li>
                         <li id="req-lower" style="font-size: 11px; margin: 4px 0; color: #999;">
-                            <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i> 
+                            <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i>
                             At least 1 lowercase letter (a-z)
                         </li>
                         <li id="req-number" style="font-size: 11px; margin: 4px 0; color: #999;">
-                            <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i> 
+                            <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i>
                             At least 1 number (0-9)
                         </li>
                         <li id="req-special" style="font-size: 11px; margin: 4px 0; color: #999;">
-                            <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i> 
+                            <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i>
                             At least 1 special character (@$!%*?&)
                         </li>
                     </ul>
                 </div>
-                
+
                 <div class="input-group">
                     <i class="fas fa-check-circle"></i>
                     <input type="password" id="confirmPassword" placeholder="Confirm Password" required>
                     <i class="fas fa-eye-slash toggle-confirm-password" style="right: 15px; left: auto; cursor: pointer;"></i>
                 </div>
                 <div id="passwordMatchMsg" style="font-size: 11px; margin-top: -10px; margin-bottom: 10px;"></div>
-                
+
                 <button type="submit" id="registerBtn" class="btn-primary" disabled>Register</button>
             </form>
         </div>
     </div>
-    
+
     <!-- Email Verification Modal -->
     <div id="verifyModal" class="modal hidden">
         <div class="modal-content">
@@ -118,7 +138,7 @@
             <button id="resendCodeBtn" class="btn-secondary">Resend Code</button>
         </div>
     </div>
-    
+
     <!-- Forgot Password Modal -->
     <div id="forgotModal" class="modal hidden">
         <div class="modal-content">
@@ -133,7 +153,7 @@
             </form>
         </div>
     </div>
-    
+
     <!-- Reset Password Modal with Validation -->
     <div id="resetPasswordModal" class="modal hidden">
         <div class="modal-content">
@@ -148,45 +168,45 @@
                 <input type="password" id="newPassword" placeholder="New Password">
                 <i class="fas fa-eye-slash toggle-reset-password" style="right: 15px; left: auto; cursor: pointer;"></i>
             </div>
-            
+
             <!-- Reset Password Requirements List -->
             <div class="password-requirements" id="resetPasswordRequirements">
                 <p style="font-size: 12px; margin-bottom: 8px; color: #666;">Password must contain:</p>
                 <ul style="list-style: none; padding-left: 0;">
                     <li id="reset-req-length" style="font-size: 11px; margin: 4px 0; color: #999;">
-                        <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i> 
+                        <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i>
                         At least 8 characters
                     </li>
                     <li id="reset-req-upper" style="font-size: 11px; margin: 4px 0; color: #999;">
-                        <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i> 
+                        <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i>
                         At least 1 uppercase letter (A-Z)
                     </li>
                     <li id="reset-req-lower" style="font-size: 11px; margin: 4px 0; color: #999;">
-                        <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i> 
+                        <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i>
                         At least 1 lowercase letter (a-z)
                     </li>
                     <li id="reset-req-number" style="font-size: 11px; margin: 4px 0; color: #999;">
-                        <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i> 
+                        <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i>
                         At least 1 number (0-9)
                     </li>
                     <li id="reset-req-special" style="font-size: 11px; margin: 4px 0; color: #999;">
-                        <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i> 
+                        <i class="fas fa-circle" style="font-size: 8px; margin-right: 6px;"></i>
                         At least 1 special character (@$!%*?&)
                     </li>
                 </ul>
             </div>
-            
+
             <div class="input-group">
                 <i class="fas fa-check-circle"></i>
                 <input type="password" id="confirmNewPassword" placeholder="Confirm New Password">
                 <i class="fas fa-eye-slash toggle-confirm-reset-password" style="right: 15px; left: auto; cursor: pointer;"></i>
             </div>
             <div id="resetPasswordMatchMsg" style="font-size: 11px; margin-top: -10px; margin-bottom: 10px;"></div>
-            
+
             <button id="resetPasswordBtn" class="btn-primary" disabled>Reset Password</button>
         </div>
     </div>
-    
+
     <script src="js/api.js"></script>
     <script src="js/login.js"></script>
 </body>

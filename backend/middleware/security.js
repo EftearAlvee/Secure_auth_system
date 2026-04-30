@@ -1,7 +1,8 @@
-const csrf = require('csrf');
+import csrf from 'csrf';
+
 const Tokens = new csrf();
 
-const csrfProtection = (req, res, next) => {
+export const csrfProtection = (req, res, next) => {
   const csrfToken = req.headers['x-csrf-token'] || req.body.csrfToken;
 
   if (!csrfToken) {
@@ -16,12 +17,10 @@ const csrfProtection = (req, res, next) => {
   next();
 };
 
-const generateCSRFToken = (req, res, next) => {
+export const generateCSRFToken = (req, res, next) => {
   const secret = Tokens.secretSync();
   const token = Tokens.create(secret);
   req.csrfToken = token;
   res.cookie('csrfSecret', secret, { httpOnly: true, secure: true, sameSite: 'strict' });
   next();
 };
-
-module.exports = { csrfProtection, generateCSRFToken };

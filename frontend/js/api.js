@@ -1,9 +1,11 @@
-// Use the same domain as your frontend
-const API_BASE_URL = 'https://secure-auth-system-wine.vercel.app/api';
+// API URL - relative path since frontend and backend are on same port
+const API_BASE_URL = '/api';
 
 class AuthAPI {
     static async request(endpoint, options = {}) {
         try {
+            console.log(`📡 API Request: ${API_BASE_URL}${endpoint}`);
+
             const response = await fetch(`${API_BASE_URL}${endpoint}`, {
                 ...options,
                 headers: {
@@ -16,7 +18,11 @@ class AuthAPI {
             const data = await response.json();
 
             if (response.status === 401) {
+                console.log('Unauthorized, clearing local storage');
                 localStorage.removeItem('user');
+                if (!window.location.pathname.includes('login.html') && !window.location.pathname.includes('index.html')) {
+                    window.location.href = '/';
+                }
                 throw new Error('Session expired');
             }
 
@@ -56,6 +62,27 @@ class AuthAPI {
         return this.request('/auth/login', {
             method: 'POST',
             body: JSON.stringify(credentials)
+        });
+    }
+
+    static async verify2FA(tempToken, twoFACode, deviceInfo, trustDevice) {
+        return this.request('/auth/verify-2fa', {
+            method: 'POST',
+            body: JSON.stringify({ tempToken, twoFACode, deviceInfo, trustDevice })
+        });
+    }
+
+    static async resend2FA(tempToken) {
+        return this.request('/auth/resend-2fa', {
+            method: 'POST',
+            body: JSON.stringify({ tempToken })
+        });
+    }
+
+    static async toggle2FA(enable) {
+        return this.request('/auth/toggle-2fa', {
+            method: 'POST',
+            body: JSON.stringify({ enable })
         });
     }
 

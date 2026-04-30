@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const bcrypt = require('bcryptjs');
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
 
 const userSchema = new mongoose.Schema({
   username: {
@@ -20,11 +20,20 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  twoFASecret: String,
+  twoFASecret: {
+    type: String,
+    default: null
+  },
   twoFAEnabled: {
     type: Boolean,
     default: false
   },
+  twoFACode: String,
+  twoFACodeExpires: Date,
+  twoFABackupCodes: [{
+    code: String,
+    used: { type: Boolean, default: false }
+  }],
   failedAttempts: {
     type: Number,
     default: 0
@@ -46,7 +55,7 @@ const userSchema = new mongoose.Schema({
   }],
   isVerified: {
     type: Boolean,
-    default: true
+    default: false
   },
   verificationCode: String,
   verificationCodeExpires: Date,
@@ -66,7 +75,7 @@ const userSchema = new mongoose.Schema({
 // Hash password before saving
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
-  
+
   try {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);
@@ -86,6 +95,25 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
   }
 };
 
+// Generate 2FA code
+userSchema.methods.generateTwoFACode = function() {
+  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  this.twoFACode = code;
+  this.twoFACodeExpires = new Date(Date.now() + 5 * 60 * 1000);
+  return code;
+};
+
+// Generate backup codes
+userSchema.methods.generateBackupCodes = function() {
+  const codes = [];
+  for (let i = 0; i < 10; i++) {
+    const code = Math.floor(10000000 + Math.random() * 90000000).toString();
+    codes.push({ code, used: false });
+  }
+  this.twoFABackupCodes = codes;
+  return codes.map(c => c.code);
+};
+
 // Generate verification code
 userSchema.methods.generateVerificationCode = function() {
   const code = Math.floor(100000 + Math.random() * 900000).toString();
@@ -102,4 +130,5 @@ userSchema.methods.generateResetCode = function() {
   return code;
 };
 
-module.exports = mongoose.model('User', userSchema);
+const User = mongoose.model('User', userSchema);
+export default User;

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Check Auth Status</title>
+    <script src="js/api.js"></script>
+</head>
+<body>
+    <h1>Authentication Status Check</h1>
+    <div id="status"></div>
+    <button onclick="checkAuth()">Check Auth</button>
+    <button onclick="checkCookies()">Check Cookies</button>
+    <button onclick="goToSettings()">Go to Settings</button>
+    
+    <script>
+        async function checkAuth() {
+            const div = document.getElementById('status');
+            div.innerHTML = 'Checking...';
+            
+            try {
+                const profile = await AuthAPI.getProfile();
+                div.innerHTML = '<pre style="color: green;">✅ Authenticated!\n' + JSON.stringify(profile, null, 2) + '</pre>';
+            } catch (error) {
+                div.innerHTML = '<pre style="color: red;">❌ Not authenticated: ' + error.message + '</pre>';
+            }
+        }
+        
+        function checkCookies() {
+            const div = document.getElementById('status');
+            div.innerHTML = 'Cookies: ' + document.cookie;
+        }
+        
+        function goToSettings() {
+            window.location.href = 'settings.html';
+        }
+    </script>
+</body>
+</html>

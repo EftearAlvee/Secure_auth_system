@@ -19,21 +19,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('totalLogins').textContent = user.totalLogins || 1;
     document.getElementById('memberSince').textContent = new Date().toLocaleDateString();
 
-    // Load profile data from server
+    // Try to load profile - but don't redirect on failure
     try {
         console.log('Fetching user profile...');
         const profile = await AuthAPI.getProfile();
         console.log('Profile response:', profile);
-        if (profile.user) {
+        if (profile && profile.user) {
             document.getElementById('totalLogins').textContent = profile.user.totalLogins || 1;
+            // Update local storage with latest user data
+            localStorage.setItem('user', JSON.stringify(profile.user));
         }
     } catch (error) {
-        console.error('Failed to load profile:', error);
-        // If session expired, redirect to login
-        if (error.message === 'Session expired') {
-            localStorage.removeItem('user');
-            window.location.href = 'index.html';
-        }
+        console.log('Profile fetch failed, but continuing with cached user data');
+        // Don't redirect - user may still be logged in
     }
 
     // Logout functionality
@@ -42,7 +40,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const confirmLogoutBtn = document.getElementById('confirmLogoutBtn');
     const cancelLogoutBtn = document.getElementById('cancelLogoutBtn');
 
-    // Show logout confirmation modal
     if (logoutBtn) {
         logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
@@ -53,7 +50,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Confirm logout
     if (confirmLogoutBtn) {
         confirmLogoutBtn.addEventListener('click', async () => {
             console.log('Confirming logout');
@@ -66,7 +62,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 localStorage.removeItem('user');
                 localStorage.removeItem('csrfToken');
 
-                // Clear all cookies
                 document.cookie.split(";").forEach(function(c) {
                     document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
                 });
@@ -77,13 +72,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             } catch (error) {
                 console.error('Logout error:', error);
                 localStorage.removeItem('user');
-                localStorage.removeItem('csrfToken');
                 window.location.href = 'index.html';
             }
         });
     }
 
-    // Cancel logout
     if (cancelLogoutBtn) {
         cancelLogoutBtn.addEventListener('click', () => {
             if (logoutConfirmModal) {
@@ -92,7 +85,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Close modal when clicking outside
+    // Settings button
+    const settingsBtn = document.getElementById('settingsBtn');
+    if (settingsBtn) {
+        settingsBtn.addEventListener('click', () => {
+            window.location.href = 'settings.html';
+        });
+    }
+
     window.addEventListener('click', (e) => {
         if (e.target === logoutConfirmModal) {
             logoutConfirmModal.classList.add('hidden');
@@ -124,16 +124,4 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }
     });
-
-    // Session keep-alive (optional - prevents auto logout)
-    setInterval(async () => {
-        try {
-            await AuthAPI.getProfile();
-            console.log('Session active');
-        } catch (error) {
-            console.log('Session expired, redirecting...');
-            localStorage.removeItem('user');
-            window.location.href = 'index.html';
-        }
-    }, 5 * 60 * 1000);
 });
